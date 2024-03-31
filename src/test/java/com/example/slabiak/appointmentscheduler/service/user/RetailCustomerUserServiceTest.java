@@ -25,8 +25,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class RetailCustomerUserServiceTest {
 
-    @Mock
-    private BCryptPasswordEncoder passwordEncoder;
+
 
     @Mock
     private RoleRepository roleRepository;
@@ -111,6 +110,8 @@ public class RetailCustomerUserServiceTest {
         verify(retailCustomerRepository, times(1)).save(argumentCaptor.capture());
     }
 
+    @Mock
+    private BCryptPasswordEncoder passwordEncoder;
     @Test
     public void shouldEncodePasswordWhenForNewRetailCustomer() {
         when(passwordEncoder.encode(password)).thenReturn(passwordEncoded);
