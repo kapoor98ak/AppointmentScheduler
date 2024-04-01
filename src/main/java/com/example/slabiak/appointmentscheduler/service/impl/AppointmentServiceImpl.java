@@ -90,8 +90,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.findByProviderIdWithStartInPeroid(providerId, day.atStartOfDay(), day.atStartOfDay().plusDays(1));
     }
 
-    @Override
-    public List<Appointment> getAppointmentsByCustomerAtDay(int providerId, LocalDate day) {
+//    Before Refactorings using the "Rename method" was done.
+//    @Override
+//    public List<Appointment> getAppointmentsByCustomerAtDay(int providerId, LocalDate day) {
+//        return appointmentRepository.findByCustomerIdWithStartInPeroid(providerId, day.atStartOfDay(), day.atStartOfDay().plusDays(1));
+//    }
+//    After Refactorings using the "Rename method" was done.
+    public List<Appointment> getAppointmentsByCustomerAtDayAndTimePeriods(int providerId, LocalDate day){
         return appointmentRepository.findByCustomerIdWithStartInPeroid(providerId, day.atStartOfDay(), day.atStartOfDay().plusDays(1));
     }
 
@@ -102,7 +107,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         DayPlan selectedDay = workingPlan.getDay(date.getDayOfWeek().toString().toLowerCase());
 
         List<Appointment> providerAppointments = getAppointmentsByProviderAtDay(providerId, date);
-        List<Appointment> customerAppointments = getAppointmentsByCustomerAtDay(customerId, date);
+        List<Appointment> customerAppointments = getAppointmentsByCustomerAtDayAndTimePeriods(customerId, date);
 
         List<TimePeroid> availablePeroids = selectedDay.timePeriodsWithBreaksExcluded();
         availablePeroids = excludeAppointmentsFromTimePeroids(availablePeroids, providerAppointments);
