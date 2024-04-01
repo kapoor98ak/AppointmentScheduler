@@ -26,7 +26,9 @@ import java.util.List;
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
 
-    private final int NUMBER_OF_ALLOWED_CANCELATIONS_PER_MONTH = 1;
+//    NUMBER_OF_ALLOWED_CANCELATIONS_PER_MONTH is a Long Identifier Implementation Smell.
+//    It can be changed to allowedCancelPerMonth to mitigate the code smell.
+    private final int allowedCancelPerMonth = 1;
     private final AppointmentRepository appointmentRepository;
     private final UserService userService;
     private final WorkService workService;
@@ -102,7 +104,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         List<Appointment> providerAppointments = getAppointmentsByProviderAtDay(providerId, date);
         List<Appointment> customerAppointments = getAppointmentsByCustomerAtDay(customerId, date);
 
-        List<TimePeroid> availablePeroids = selectedDay.timePeroidsWithBreaksExcluded();
+        List<TimePeroid> availablePeroids = selectedDay.timePeriodsWithBreaksExcluded();
         availablePeroids = excludeAppointmentsFromTimePeroids(availablePeroids, providerAppointments);
 
         availablePeroids = excludeAppointmentsFromTimePeroids(availablePeroids, customerAppointments);
@@ -337,7 +339,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 return "Appointments which will be in less than 24 hours cannot be canceled.";
             } else if (!appointment.getWork().getEditable()) {
                 return "This type of appointment can be canceled only by Provider.";
-            } else if (getCanceledAppointmentsByCustomerIdForCurrentMonth(userId).size() >= NUMBER_OF_ALLOWED_CANCELATIONS_PER_MONTH) {
+            } else if (getCanceledAppointmentsByCustomerIdForCurrentMonth(userId).size() >= allowedCancelPerMonth) {
                 return "You can't cancel this appointment because you exceeded maximum number of cancellations in this month.";
             } else {
                 return null;
