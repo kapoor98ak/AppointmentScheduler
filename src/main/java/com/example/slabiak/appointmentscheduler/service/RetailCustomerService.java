@@ -8,6 +8,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.Collection;
 import java.util.List;
 
+// We separated the RetailCustomer Interface and Class from the User Class - this is the Extract Class Refactoring technique
+
 public interface RetailCustomerService {
     public void saveNewRetailCustomer(UserForm userForm);
 

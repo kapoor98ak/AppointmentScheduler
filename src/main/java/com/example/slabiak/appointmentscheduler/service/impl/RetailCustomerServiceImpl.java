@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 
 //    Move Method Refactoring - I moved the RetailCustomer to its own class implementation
+//    We separated the RetailCustomer Interface and Class from the User Class - this is the Extract Class Refactoring technique
 @Service
 public class RetailCustomerServiceImpl implements RetailCustomerService {
 
