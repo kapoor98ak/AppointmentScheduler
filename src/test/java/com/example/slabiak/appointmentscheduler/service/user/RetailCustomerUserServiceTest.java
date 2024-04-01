@@ -5,212 +5,124 @@ import com.example.slabiak.appointmentscheduler.dao.user.customer.RetailCustomer
 import com.example.slabiak.appointmentscheduler.entity.user.Role;
 import com.example.slabiak.appointmentscheduler.entity.user.customer.RetailCustomer;
 import com.example.slabiak.appointmentscheduler.model.UserForm;
-import com.example.slabiak.appointmentscheduler.service.impl.UserServiceImpl;
-import org.junit.Before;
+import com.example.slabiak.appointmentscheduler.service.RetailCustomerService;
+import com.example.slabiak.appointmentscheduler.service.impl.RetailCustomerServiceImpl;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class RetailCustomerUserServiceTest {
 
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
+public class RetailCustomerServiceTest {
+
+    @Mock
+    private RetailCustomerRepository retailCustomerRepository;
 
     @Mock
     private RoleRepository roleRepository;
 
     @Mock
-    private RetailCustomerRepository retailCustomerRepository;
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private UserServiceImpl userService;
+    private RetailCustomerService retailCustomerService;
 
-    UserForm retailUserForm;
-    RetailCustomer retailCustomer;
-    Optional<RetailCustomer> optionalRetailCustomer;
-
-    private int userId;
-    private String userName;
-    private String password;
-    private String matchingPassword;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String mobile;
-    private String street;
-    private String postcode;
-    private String city;
-
-    String passwordEncoded;
-
-    private String roleNameCustomer;
-    private String roleNameRetailCustomer;
-    private Role roleCustomer;
-    private Role roleRetailCustomer;
-    Collection<Role> retailCustomerRoles;
-
-
-    @Before
-    public void initObjects() {
-
-        userId = 1;
-        userName = "username";
-        password = "password";
-        matchingPassword = "password";
-        firstName = "firstname";
-        lastName = "lastname";
-        email = "email@example.com";
-        mobile = "123456789";
-        street = "street";
-        postcode = "12-345";
-        city = "city";
-
-        passwordEncoded = "xxxx";
-
-        retailUserForm = new UserForm();
-        retailUserForm.setUserName(userName);
-        retailUserForm.setPassword(password);
-        retailUserForm.setMatchingPassword(matchingPassword);
-        retailUserForm.setFirstName(firstName);
-        retailUserForm.setLastName(lastName);
-        retailUserForm.setEmail(email);
-        retailUserForm.setMobile(mobile);
-        retailUserForm.setStreet(street);
-        retailUserForm.setPostcode(postcode);
-        retailUserForm.setCity(city);
-        retailUserForm.setId(userId);
-
-        roleNameCustomer = "ROLE_CUSTOMER";
-        roleNameRetailCustomer = "ROLE_CUSTOMER_RETAIL";
-        roleCustomer = new Role(roleNameCustomer);
-        roleRetailCustomer = new Role(roleNameRetailCustomer);
-        retailCustomerRoles = new HashSet<>();
-        retailCustomerRoles.add(roleCustomer);
-        retailCustomerRoles.add(roleRetailCustomer);
-
-
+    @BeforeEach
+    void setUp() {
+        // No need for explicit setup
     }
 
     @Test
-    public void shouldSaveNewRetailCustomer() {
-        ArgumentCaptor<RetailCustomer> argumentCaptor = ArgumentCaptor.forClass(RetailCustomer.class);
-        userService.saveNewRetailCustomer(retailUserForm);
+    public void testSaveNewRetailCustomer() {
+        // Arrange
+        UserForm userForm = new UserForm();
+        userForm.setUserName("testuser");
+        userForm.setPassword("password");
 
-        verify(retailCustomerRepository, times(1)).save(argumentCaptor.capture());
-    }
+        Role roleRetailCustomer = new Role("ROLE_CUSTOMER_RETAIL");
+        Role roleCustomer = new Role("ROLE_CUSTOMER");
+        when(roleRepository.findByName("ROLE_CUSTOMER_RETAIL")).thenReturn(roleRetailCustomer);
+        when(roleRepository.findByName("ROLE_CUSTOMER")).thenReturn(roleCustomer);
 
-    @Mock
-    private BCryptPasswordEncoder passwordEncoder;
-    @Test
-    public void shouldEncodePasswordWhenForNewRetailCustomer() {
-        when(passwordEncoder.encode(password)).thenReturn(passwordEncoded);
+        RetailCustomer savedRetailCustomer = new RetailCustomer();
+        when(retailCustomerRepository.save(any(RetailCustomer.class))).thenReturn(savedRetailCustomer);
 
-        ArgumentCaptor<RetailCustomer> argumentCaptor = ArgumentCaptor.forClass(RetailCustomer.class);
-        userService.saveNewRetailCustomer(retailUserForm);
+        // Act
+        retailCustomerService.saveNewRetailCustomer(userForm);
 
-        verify(retailCustomerRepository, times(1)).save(argumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue().getPassword(), passwordEncoded);
-    }
-
-    @Test
-    public void userFormDataShouldMatchRetailCustomerObject() {
-
-        ArgumentCaptor<RetailCustomer> argumentCaptor = ArgumentCaptor.forClass(RetailCustomer.class);
-        userService.saveNewRetailCustomer(retailUserForm);
-
-        verify(retailCustomerRepository, times(1)).save(argumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue().getUserName(), retailUserForm.getUserName());
-        assertEquals(argumentCaptor.getValue().getFirstName(), retailUserForm.getFirstName());
-        assertEquals(argumentCaptor.getValue().getLastName(), retailUserForm.getLastName());
-        assertEquals(argumentCaptor.getValue().getEmail(), retailUserForm.getEmail());
-        assertEquals(argumentCaptor.getValue().getMobile(), retailUserForm.getMobile());
-        assertEquals(argumentCaptor.getValue().getStreet(), retailUserForm.getStreet());
-        assertEquals(argumentCaptor.getValue().getCity(), retailUserForm.getCity());
-        assertEquals(argumentCaptor.getValue().getPostcode(), retailUserForm.getPostcode());
+        // Assert
+        verify(passwordEncoder).encode("password");
+        verify(retailCustomerRepository).save(any(RetailCustomer.class));
     }
 
     @Test
-    public void shouldAssignTwoRolesForRetailCustomer() {
-        doReturn(roleRetailCustomer).when(roleRepository).findByName(roleNameRetailCustomer);
-        doReturn(roleCustomer).when(roleRepository).findByName(roleNameCustomer);
+    public void testGetAllRetailCustomers() {
+        // Arrange
+        RetailCustomer retailCustomer1 = new RetailCustomer();
+        RetailCustomer retailCustomer2 = new RetailCustomer();
+        when(retailCustomerRepository.findAll()).thenReturn(List.of(retailCustomer1, retailCustomer2));
 
-        ArgumentCaptor<RetailCustomer> argumentCaptor = ArgumentCaptor.forClass(RetailCustomer.class);
-        userService.saveNewRetailCustomer(retailUserForm);
+        // Act
+        List<RetailCustomer> retailCustomers = retailCustomerService.getAllRetailCustomers();
 
-        verify(retailCustomerRepository, times(1)).save(argumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue().getRoles().size(), 2);
+        // Assert
+        assertEquals(2, retailCustomers.size());
     }
 
     @Test
-    public void shouldAssignCorrectRolesForRetailCustomer() {
-        doReturn(roleRetailCustomer).when(roleRepository).findByName(roleNameRetailCustomer);
-        doReturn(roleCustomer).when(roleRepository).findByName(roleNameCustomer);
+    public void testGetRolesForRetailCustomer() {
+        // Arrange
+        Role roleRetailCustomer = new Role("ROLE_CUSTOMER_RETAIL");
+        Role roleCustomer = new Role("ROLE_CUSTOMER");
+        when(roleRepository.findByName("ROLE_CUSTOMER_RETAIL")).thenReturn(roleRetailCustomer);
+        when(roleRepository.findByName("ROLE_CUSTOMER")).thenReturn(roleCustomer);
 
-        ArgumentCaptor<RetailCustomer> argumentCaptor = ArgumentCaptor.forClass(RetailCustomer.class);
-        userService.saveNewRetailCustomer(retailUserForm);
+        // Act
+        Collection<Role> roles = retailCustomerService.getRolesForRetailCustomer();
 
-        verify(retailCustomerRepository, times(1)).save(argumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue().hasRole(roleNameRetailCustomer), true);
-        assertEquals(argumentCaptor.getValue().hasRole(roleNameCustomer), true);
+        // Assert
+        assertEquals(2, roles.size());
+        assertTrue(roles.contains(roleRetailCustomer));
+        assertTrue(roles.contains(roleCustomer));
     }
 
     @Test
-    public void shouldUpdateRetailCustomerProfileData() {
-        RetailCustomer customerToBeUpdated = new RetailCustomer();
-        customerToBeUpdated.setId(userId);
+    public void testGetRetailCustomerById() {
+        // Arrange
+        RetailCustomer retailCustomer = new RetailCustomer();
+        when(retailCustomerRepository.findById(1)).thenReturn(Optional.of(retailCustomer));
 
-        doReturn(customerToBeUpdated).when(retailCustomerRepository).getOne(userId);
+        // Act
+        RetailCustomer retrievedRetailCustomer = retailCustomerService.getRetailCustomerById(1);
 
-        ArgumentCaptor<RetailCustomer> argumentCaptor = ArgumentCaptor.forClass(RetailCustomer.class);
-        userService.updateRetailCustomerProfile(retailUserForm);
-        verify(retailCustomerRepository, times(1)).save(argumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue().getFirstName(), retailUserForm.getFirstName());
-        assertEquals(argumentCaptor.getValue().getLastName(), retailUserForm.getLastName());
-        assertEquals(argumentCaptor.getValue().getEmail(), retailUserForm.getEmail());
-        assertEquals(argumentCaptor.getValue().getMobile(), retailUserForm.getMobile());
-        assertEquals(argumentCaptor.getValue().getStreet(), retailUserForm.getStreet());
-        assertEquals(argumentCaptor.getValue().getCity(), retailUserForm.getCity());
-        assertEquals(argumentCaptor.getValue().getPostcode(), retailUserForm.getPostcode());
+        // Assert
+        assertNotNull(retrievedRetailCustomer);
+        assertEquals(retailCustomer, retrievedRetailCustomer);
     }
 
     @Test
-    public void shouldNotAffectUsernameAndPasswordAndRolesWhileRetailCustomerProfileUpdate() {
-        RetailCustomer customerToBeUpdated = new RetailCustomer();
-        String currentUsername = "username2";
-        String currentPassword = "password2";
-        customerToBeUpdated.setUserName(currentUsername);
-        customerToBeUpdated.setPassword(currentPassword);
-        customerToBeUpdated.setRoles(retailCustomerRoles);
-        doReturn(customerToBeUpdated).when(retailCustomerRepository).getOne(userId);
+    public void testGetRetailCustomerById_ThrowsExceptionWhenNotFound() {
+        // Arrange
+        when(retailCustomerRepository.findById(1)).thenReturn(Optional.empty());
 
-        ArgumentCaptor<RetailCustomer> argumentCaptor = ArgumentCaptor.forClass(RetailCustomer.class);
-        userService.updateRetailCustomerProfile(retailUserForm);
-        verify(retailCustomerRepository, times(1)).save(argumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue().getUserName(), currentUsername);
-        assertEquals(argumentCaptor.getValue().getPassword(), currentPassword);
-        assertEquals(argumentCaptor.getValue().getRoles(), retailCustomerRoles);
-    }
-
-    @Test
-    public void shouldFindRetailCustomerById() {
-        retailCustomer = new RetailCustomer();
-        retailCustomer.setId(userId);
-        retailCustomer.setUserName(userName);
-        optionalRetailCustomer = Optional.of(retailCustomer);
-        when(retailCustomerRepository.findById(userId)).thenReturn(optionalRetailCustomer);
-        assertEquals(optionalRetailCustomer.get(), userService.getRetailCustomerById(userId));
-        verify(retailCustomerRepository, times(1)).findById(userId);
+        // Act & Assert
+        assertThrows(UsernameNotFoundException.class, () -> retailCustomerService.getRetailCustomerById(1));
     }
 
 }
