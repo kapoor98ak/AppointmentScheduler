@@ -7,6 +7,7 @@ import com.example.slabiak.appointmentscheduler.dao.user.customer.RetailCustomer
 import com.example.slabiak.appointmentscheduler.entity.user.Role;  // Add this import
 import com.example.slabiak.appointmentscheduler.entity.user.customer.RetailCustomer;
 import com.example.slabiak.appointmentscheduler.model.UserForm;
+import com.example.slabiak.appointmentscheduler.service.RetailCustomerService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,18 +19,23 @@ import java.util.List;
 
 //    Move Method Refactoring - I moved the RetailCustomer to its own class implementation
 @Service
-public class RetailCustomerService implements com.example.slabiak.appointmentscheduler.service.RetailCustomerService {
+public class RetailCustomerServiceImpl implements RetailCustomerService {
 
     private final RetailCustomerRepository retailCustomerRepository;
     private final PasswordEncoder passwordEncoder;
 
     private RoleRepository roleRepository ;
 
-    public RetailCustomerService(RetailCustomerRepository retailCustomerRepository,PasswordEncoder passwordEncoder,RoleRepository roleRepository) {
+    public RetailCustomerServiceImpl(RetailCustomerRepository retailCustomerRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.retailCustomerRepository = retailCustomerRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
 
+    }
+
+    public RetailCustomerServiceImpl(RetailCustomerRepository retailCustomerRepository, PasswordEncoder passwordEncoder) {
+        this.retailCustomerRepository = retailCustomerRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
